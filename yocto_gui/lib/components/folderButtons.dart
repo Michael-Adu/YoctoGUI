@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yocto_gui/components/fileButtons.dart';
 import '../global.dart' as global;
 import 'dart:io';
+import 'dart:math' as math;
 
 class FolderButtons extends StatefulWidget {
   Directory? folder;
@@ -34,27 +35,37 @@ class _FolderButtonsState extends State<FolderButtons> {
     folders.value.folder = widget.folder!;
     return Container(
         child: Column(children: [
-      Row(
-        children: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  collapsed = !collapsed;
-                  global.getAllDirectory(widget.folder!).then((value) {
-                    folders.value.subFolder = value;
-                  });
-                });
-              },
-              icon: Icon(
-                collapsed ? Icons.arrow_downward : Icons.arrow_forward,
-                color: Colors.white,
-              )),
-          Container(
-              alignment: Alignment.centerLeft,
-              child: Text(folders.value.folder.path
-                  .substring(folders.value.folder.path.lastIndexOf('/') + 1))),
-        ],
-      ),
+      Container(
+          height: MediaQuery.of(context).size.height * 0.04,
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: Duration(milliseconds: 500),
+                child: Transform.rotate(
+                    angle: collapsed ? math.pi / 2 : 0,
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            collapsed = !collapsed;
+                            global
+                                .getAllDirectory(widget.folder!)
+                                .then((value) {
+                              folders.value.subFolder = value;
+                            });
+                          });
+                        },
+                        icon: Icon(
+                          Icons.arrow_forward_ios_outlined,
+                          color: Colors.white,
+                          size: 15,
+                        ))),
+              ),
+              Container(
+                  alignment: Alignment.centerLeft,
+                  child: Text(folders.value.folder.path.substring(
+                      folders.value.folder.path.lastIndexOf('/') + 1))),
+            ],
+          )),
       ValueListenableBuilder(
           valueListenable: folders,
           builder: ((context, value, child) {
@@ -93,15 +104,17 @@ class _FolderButtonsState extends State<FolderButtons> {
                                                 element.directory == e) <
                                         0) {
                                       setState(() {
-                                        _tabs.add(global.CodeTabs(
-                                            e.path.substring(
-                                                e.path.lastIndexOf("/") + 1),
-                                            e,
-                                            code,
-                                            code,
-                                            true,
-                                            false));
-                                        global.allCodeTabs.value = _tabs;
+                                        global.allCodeTabs.value.add(
+                                            global.CodeTabs(
+                                                e.path.substring(
+                                                    e.path.lastIndexOf("/") +
+                                                        1),
+                                                e,
+                                                code,
+                                                code,
+                                                true,
+                                                false));
+                                        global.tabsChanged.value = true;
                                       });
 
                                       print("Opening " +

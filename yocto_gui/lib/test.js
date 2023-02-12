@@ -23,10 +23,12 @@ var server = http.createServer((request, response)=>{
             }
             else if(obj.commandType=="execute"){
                 try{
-                    var commandResult= shell.exec(obj.command);
-                    console.log(commandResult.stdout.replace("\n", "\\n"))
-                    var command_stdout = commandResult.stdout.replace("\n", "\\n");
-                    var command_stderr = commandResult.stderr.replace("\n", "\\n");
+                    var commandResult= shell.exec(obj.command, {
+                        shell: '/bin/bash'
+                    });
+                    //console.log(commandResult.stdout.replaceAll(RegExp("\n"), RegExp("\\n")))
+                    var command_stdout = commandResult.stdout.split("\n").join("{nl}").replace(/\"/g, "'");
+                    var command_stderr = commandResult.stderr.split("\n").join("{nl}").replace(/\"/g, "'");
                     var userHostName = shell.exec('echo "$USER@$HOSTNAME"').stdout.split("\n")[0];
                     var workingDirectory = shell.exec('echo "$PWD"').stdout.split("\n")[0];
                     response.end(
@@ -45,7 +47,6 @@ var server = http.createServer((request, response)=>{
                 }
                 
             }
-            
         })
     }
 })

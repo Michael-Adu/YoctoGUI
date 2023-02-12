@@ -125,9 +125,17 @@ class _TerminalState extends State<Terminal> {
                                           )
                                         ]),
                                     Container(
-                                        child: Text('${e.stdout}\n${e.stderr}',
-                                            style:
-                                                TextStyle(color: Colors.white)))
+                                        padding:
+                                            EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                        alignment: Alignment.centerLeft,
+                                        child: Column(children: [
+                                          Text('${e.stdout}\n',
+                                              style: TextStyle(
+                                                  color: Colors.white)),
+                                          Text('${e.stderr}',
+                                              style:
+                                                  TextStyle(color: Colors.red))
+                                        ]))
                                   ]))
                           .toList()),
                 )));

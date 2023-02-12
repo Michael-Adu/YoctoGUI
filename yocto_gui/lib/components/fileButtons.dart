@@ -21,6 +21,8 @@ class _FileButtonsState extends State<FileButtons> {
   @override
   Widget build(BuildContext context) {
     return Container(
+        height: MediaQuery.of(context).size.height * 0.04,
+        padding: const EdgeInsets.fromLTRB(10, 10, 0, 0),
         child: GestureDetector(
             onTap: () async {
               widget.onLeftClick!(widget.file!);
@@ -34,7 +36,7 @@ class _FileButtonsState extends State<FileButtons> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+                    padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
                     child: Icon(Icons.file_open, color: Colors.white),
                   ),
                   Text(widget.file!.path

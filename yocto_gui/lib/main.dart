@@ -12,6 +12,7 @@ void main() async {
     appWindow.size = initialSize;
     appWindow.alignment = Alignment.center;
     appWindow.show();
+    global.retrieveBranches();
   });
   runApp(const MyApp());
 }

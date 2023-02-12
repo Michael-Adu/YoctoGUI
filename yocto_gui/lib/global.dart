@@ -1,30 +1,35 @@
 library yocto_gui.globals;
 
+import 'dart:math';
+import 'dart:io';
+import 'dart:convert';
+
+import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:html/dom.dart' as dom;
 import 'package:flutter/material.dart';
-import 'package:filesystem_picker/filesystem_picker.dart';
-import 'dart:io';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 List<TerminalCommand> allCommands = List<TerminalCommand>.empty(growable: true);
-ValueNotifier<List<CodeTabs>> allCodeTabs = ValueNotifier<List<CodeTabs>>(
-    [CodeTabs("test.c", Directory(""), "", "", true, false)]);
+List<LayerBranches> allLayers = List<LayerBranches>.empty(growable: true);
+ValueNotifier<List<CodeTabs>> allCodeTabs = ValueNotifier<List<CodeTabs>>([]);
+ValueNotifier<bool> tabsChanged = ValueNotifier<bool>(false);
 String user_host = "";
 String initWD = "";
 
 Future<Directory> getDirectory() async {
   Directory documentPath = Directory("/home");
-  String? folderPath = await FilesystemPicker.open(
-    title: 'Pick Directory',
-    showGoUp: true,
-    context: navigatorKey.currentContext!,
-    rootDirectory: documentPath!,
-    fsType: FilesystemType.folder,
-    pickText: 'Pick Folder',
-  );
+  String? folderPath = await FilePicker.platform.getDirectoryPath();
+  // String? folderPath = await FilesystemPicker.open(
+  //   title: 'Pick Directory',
+  //   showGoUp: true,
+  //   context: navigatorKey.currentContext!,
+  //   rootDirectory: documentPath!,
+  //   fsType: FilesystemType.folder,
+  //   pickText: 'Pick Folder',
+  // );
   Directory folder = Directory("/home");
   if (folderPath != null) {
     folder = Directory(folderPath!);
@@ -80,6 +85,13 @@ class TerminalCommand {
       };
 }
 
+class Tab {
+  var tabData;
+  Function? onClick;
+  Function? onDelete;
+  Tab(this.tabData, this.onClick, this.onDelete);
+}
+
 class CodeTabs {
   String name;
   Directory directory;
@@ -97,6 +109,24 @@ class CodeTabs {
         "saved": "${saved}",
         "changed": "${changed}"
       };
+}
+
+class LayerBranches {
+  String branchName;
+  Uri branchUri;
+  List<OpenEmbeddedLayers> layers;
+
+  LayerBranches(this.branchName, this.branchUri, this.layers);
+}
+
+class OpenEmbeddedLayers {
+  String layerName;
+  String description;
+  String layerType;
+  Uri repository;
+
+  OpenEmbeddedLayers(
+      this.layerName, this.layerType, this.description, this.repository);
 }
 
 Future<List<Folder>> getAllDirectory(Directory folder) async {
@@ -156,16 +186,15 @@ Future<TerminalCommand> executeCommand(TerminalCommand inputCommand) async {
       .post(Uri.parse("http://localhost:5768"), body: jsonEncode(inputCommand));
 
   try {
-    print(response.body.replaceAll(r'\', r"\\"));
     var finalResponse = jsonDecode(response.body.replaceAll(r'\', r"\\"));
     if (inputCommand.commandType == "execute") {
       user_host = '${finalResponse["userHostName"]}';
       result.user_hostName = '${finalResponse["userHostName"]}';
       result.wd = '${finalResponse["workingDirectory"]}';
-      print(finalResponse["stdout"].toString().replaceAll('\\n', '\n'));
       result.stdout =
-          '${finalResponse["stdout"].toString().replaceAll('\\n', '\n')}';
-      result.stderr = '${finalResponse["stderr"]}';
+          '${finalResponse["stdout"].toString().replaceAll('{nl}', '\n')}';
+      result.stderr =
+          '${finalResponse["stderr"].toString().replaceAll('{nl}', '\n')}';
     } else if (inputCommand.commandType == "init") {
       user_host = '${finalResponse["userHostName"]}';
       initWD = '${finalResponse["workingDirectory"]}';
@@ -177,4 +206,64 @@ Future<TerminalCommand> executeCommand(TerminalCommand inputCommand) async {
   }
 
   return result;
+}
+
+Future<List<LayerBranches>> retrieveBranches() async {
+  List<LayerBranches> branches = List<LayerBranches>.empty(growable: true);
+  var response = await http.Client().get(Uri.parse(
+      "https://layers.openembedded.org/layerindex/branch/master/layers/"));
+  dom.Document html = dom.Document.html(response.body);
+  final allElements = html
+      .querySelectorAll(
+          "#content > div > div > nav > div > ul:nth-child(1) > li > ul > li")
+      .map((e) => e.innerHtml.trim())
+      .toList();
+  allElements.map((element) async {
+    try {
+      List<OpenEmbeddedLayers> layers =
+          List<OpenEmbeddedLayers>.empty(growable: true);
+      Uri url = Uri.parse(
+          '''https://layers.openembedded.org${element.split("href=")[1].split(">")[0].trim().replaceAll('"', "")}''');
+      String name = "";
+      if (element.contains("<b>")) {
+        name =
+            element.split("<b>")[1].split("</b>")[0].replaceAll('"', '').trim();
+      } else {
+        name =
+            element.split("</a>")[0].split('">')[1].replaceAll('"', '').trim();
+      }
+      retrieveLayers(url).then((value) {
+        branches.add(LayerBranches(name, url, value));
+      });
+    } catch (e) {
+      print('${e} for ${element}');
+    }
+  }).toList();
+  allLayers = branches;
+  print("Finished Loading Layers");
+  return branches;
+}
+
+Future<List<OpenEmbeddedLayers>> retrieveLayers(Uri uri) async {
+  List<OpenEmbeddedLayers> layers =
+      List<OpenEmbeddedLayers>.empty(growable: true);
+  var response = await http.Client().get(uri);
+  dom.Document html = dom.Document.html(response.body);
+  final allElements = html
+      .querySelectorAll("#content > div > div > table > tbody > tr")
+      .map((e) => e.innerHtml.trim())
+      .toList();
+  allElements.map((e) {
+    List<String> tableData = e.split("/td");
+    String layerName =
+        tableData[0].split("/a")[0].split('">')[1].replaceAll("<", "");
+    String description =
+        tableData[1].split("</td>")[0].split("<td>")[1].replaceAll("<", "");
+    String type =
+        tableData[2].split("</td>")[0].split("<td>")[1].replaceAll("<", "");
+    Uri repository = Uri.parse(
+        tableData[3].split("<a")[0].split('">')[1].replaceAll('"', "").trim());
+    layers.add(OpenEmbeddedLayers(layerName, type, description, repository));
+  }).toList();
+  return layers;
 }

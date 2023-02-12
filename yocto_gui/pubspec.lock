@@ -113,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  csslib:
+    dependency: transitive
+    description:
+      name: csslib
+      sha256: b36c7f7e24c0bdf1bf9a3da461c837d1de64b9f8beb190c9011d8c72a3dfd745
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.2"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -121,6 +129,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  dropdown_button2:
+    dependency: "direct main"
+    description:
+      name: dropdown_button2
+      sha256: "580bfe26a91e822a95d96e227ac02c1e14a7d5eea32501d0fbc6fe8d5c5606e5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.2"
   equatable:
     dependency: transitive
     description:
@@ -161,14 +177,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.2.4"
-  filesystem_picker:
-    dependency: "direct main"
-    description:
-      name: filesystem_picker
-      sha256: cf790e033b3e0c07b5bc9f71458b39f1f45017641aae508ffdfb86a59baa0c1d
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -206,14 +214,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
-  flutter_staggered_grid_view:
-    dependency: "direct main"
-    description:
-      name: flutter_staggered_grid_view
-      sha256: "1312314293acceb65b92754298754801b0e1f26a1845833b740b30415bbbcf07"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.6.2"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -240,6 +240,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.3"
+  html:
+    dependency: "direct main"
+    description:
+      name: html
+      sha256: d9793e10dbe0e6c364f4c59bf3e01fb33a9b2a674bc7a1081693dba0614b6269
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.1"
   http:
     dependency: "direct main"
     description:

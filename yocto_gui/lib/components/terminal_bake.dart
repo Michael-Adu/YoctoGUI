@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yocto_gui/components/terminal.dart';
 import 'package:yocto_gui/components/yoctoGUITabs.dart';
+import 'package:yocto_gui/global.dart' as global;
 
 class TerminalBake extends StatefulWidget {
   const TerminalBake({Key? key}) : super(key: key);
@@ -37,13 +38,15 @@ class _TerminalBakeState extends State<TerminalBake> {
               width: MediaQuery.of(context).size.width * 0.12,
               child: YoctoGUITabs(
                 type: "console",
-                tabs: ["Terminal", "Serial Console"],
+                tabs: [
+                  global.Tab("Terminal", () {}, () {}),
+                  global.Tab("Serial Console", () {}, () {})
+                ],
                 onSwitch: (value) {
-                  if (value == "Terminal") {
+                  if (value.tabData == "Terminal") {
                     setState(() {
                       activeConsole = terminalWidget;
                     });
-                    print("Switching to ${value}");
                   } else {
                     setState(() {
                       activeConsole = serialConsoleWidget;
