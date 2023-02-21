@@ -54,9 +54,9 @@ class _CodeEditorState extends State<CodeEditor> {
                           border: Border.all(color: Colors.grey[900]!)),
                       height: MediaQuery.of(context).size.height * 0.05,
                       child: YoctoGUITabs(
-                        saved: selectedTab.changed,
                         tabs: _tabs
-                            .map((e) => global.Tab(e, () {}, () {
+                            .map((e) =>
+                                global.Tab(e, selectedTab.saved, () {}, () {
                                   if (_tabs.length < 1) {
                                     setState(() {
                                       selectedTab = lastSelectedTab;
@@ -97,8 +97,8 @@ class _CodeEditorState extends State<CodeEditor> {
                                 .currentCode = code;
                             global.tabsChanged.value = true;
                             setState(() {
-                              if (code != selectedTab.currentCode) {
-                                selectedTab.changed = true;
+                              if (code != selectedTab.originalCode) {
+                                selectedTab.saved = false;
                               }
                             });
                           },

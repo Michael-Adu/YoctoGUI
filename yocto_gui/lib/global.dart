@@ -82,7 +82,8 @@ class Tab {
   var tabData;
   Function? onClick;
   Function? onDelete;
-  Tab(this.tabData, this.onClick, this.onDelete);
+  bool saved;
+  Tab(this.tabData, this.saved, this.onClick, this.onDelete);
 }
 
 class CodeTabs {

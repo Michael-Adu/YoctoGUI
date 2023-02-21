@@ -39,8 +39,8 @@ class _TerminalBakeState extends State<TerminalBake> {
               child: YoctoGUITabs(
                 type: "console",
                 tabs: [
-                  global.Tab("Terminal", () {}, () {}),
-                  global.Tab("Serial Console", () {}, () {})
+                  global.Tab("Terminal", false, () {}, () {}),
+                  global.Tab("Serial Console", false, () {}, () {})
                 ],
                 onSwitch: (value) {
                   if (value.tabData == "Terminal") {

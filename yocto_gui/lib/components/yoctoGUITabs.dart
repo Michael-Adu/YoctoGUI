@@ -5,13 +5,7 @@ class YoctoGUITabs extends StatefulWidget {
   List<global.Tab>? tabs;
   Function(global.Tab)? onSwitch;
   String type;
-  bool saved;
-  YoctoGUITabs(
-      {this.tabs,
-      this.onSwitch,
-      this.type = "console",
-      this.saved = true,
-      Key? key})
+  YoctoGUITabs({this.tabs, this.onSwitch, this.type = "console", Key? key})
       : super(key: key);
 
   @override
@@ -19,7 +13,7 @@ class YoctoGUITabs extends StatefulWidget {
 }
 
 class _YoctoGUITabsState extends State<YoctoGUITabs> {
-  global.Tab selectedTab = global.Tab("", () {}, () {});
+  global.Tab selectedTab = global.Tab("", false, () {}, () {});
   bool hovered = false;
   bool deleteHovered = false;
 
@@ -64,6 +58,9 @@ class _YoctoGUITabsState extends State<YoctoGUITabs> {
                                 });
                               },
                             ),
+                            e.saved
+                                ? Icon(Icons.circle, color: Colors.white)
+                                : Container(),
                             InkWell(
                                 onHover: (value) {
                                   setState(() {
@@ -71,18 +68,12 @@ class _YoctoGUITabsState extends State<YoctoGUITabs> {
                                   });
                                 },
                                 child: Container(
-                                    child: widget.saved
-                                        ? InkWell(
-                                            child: Icon(Icons.close,
-                                                color: Colors.white),
-                                            onTap: () {
-                                              e.onDelete!();
-                                            })
-                                        : Container(
-                                            child: Icon(
-                                            Icons.circle,
-                                            color: Colors.white,
-                                          ))))
+                                    child: InkWell(
+                                        child: Icon(Icons.close,
+                                            color: Colors.white),
+                                        onTap: () {
+                                          e.onDelete!();
+                                        })))
                           ])))
                   .toList()
               : widget.tabs!
