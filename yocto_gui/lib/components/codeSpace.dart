@@ -7,9 +7,9 @@ import 'package:yocto_gui/components/yoctoGUITabs.dart';
 import 'package:yocto_gui/global.dart' as global;
 
 class CodeSpace extends StatefulWidget {
-  String code;
+  global.CodeTabs? currentTab;
   Function(String)? onChange;
-  CodeSpace({this.code = "", this.onChange, Key? key}) : super(key: key);
+  CodeSpace({this.currentTab, this.onChange, Key? key}) : super(key: key);
 
   @override
   _CodeSpaceState createState() => _CodeSpaceState();
@@ -17,12 +17,14 @@ class CodeSpace extends StatefulWidget {
 
 class _CodeSpaceState extends State<CodeSpace> {
   CodeController? _codeController;
+  late global.CodeTabs _tab;
 
   @override
   void initState() {
     super.initState();
+    _tab = widget.currentTab!;
     _codeController = CodeController(
-      text: widget.code,
+      text: widget.currentTab!.currentCode,
       language: cpp,
     );
   }

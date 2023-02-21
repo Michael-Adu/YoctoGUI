@@ -75,11 +75,9 @@ class _MainPageState extends State<MainPage> {
                         child: ValueListenableBuilder(
                             valueListenable: global.tabsChanged,
                             builder: (context, value, child) {
-                              if (widget.tabs != global.allCodeTabs) {
-                                widget.tabs = global.allCodeTabs.value;
-                                global.tabsChanged.value = false;
-                              }
-                              if (widget.tabs!.isEmpty) {
+                              print("Change in Tabs");
+                              global.tabsChanged.value = false;
+                              if (global.allCodeTabs.isEmpty) {
                                 return Container();
                               } else {
                                 return CodeEditor();

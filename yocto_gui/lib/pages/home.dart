@@ -15,7 +15,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   var currentFolder = ValueNotifier(Directory("/home"));
-  List<global.CodeTabs> _tabs = List<global.CodeTabs>.empty(growable: true);
   List<global.MenuButton> menuButtons =
       List<global.MenuButton>.empty(growable: true);
   bool _overlayEnabled = false;
@@ -24,7 +23,6 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _tabs = global.allCodeTabs.value;
     menuButtons.add(global.MenuButton("File", () {
       setState(() {
         global.getDirectory().then((value) {
@@ -51,7 +49,6 @@ class _HomeState extends State<Home> {
               MainPage(
                 currentFolder: currentFolder,
                 menuButtons: menuButtons,
-                tabs: _tabs,
                 enableOverlay: (type) {
                   setState(() {
                     _overlayEnabled = true;

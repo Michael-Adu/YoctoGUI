@@ -72,7 +72,7 @@ class _FolderButtonsState extends State<FolderButtons> {
             if (collapsed == true) {
               return Container(
                   width: MediaQuery.of(context).size.width * 0.3,
-                  padding: EdgeInsets.fromLTRB(25, 0, 0, 0),
+                  margin: EdgeInsets.fromLTRB(25, 0, 0, 0),
                   child: Expanded(
                       child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,33 +90,27 @@ class _FolderButtonsState extends State<FolderButtons> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: folders.value.filesInFolder
                             .map((e) => Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.04,
-                                child: FileButtons(
+                                    // height:
+                                    //     MediaQuery.of(context).size.height * 0.04,
+                                    child: FileButtons(
                                   file: e,
                                   onLeftClick: (file) async {
                                     File file = File(e.path);
-
-                                    _tabs = global.allCodeTabs.value;
+                                    _tabs = global.allCodeTabs;
                                     String code = await file.readAsString();
-                                    if (global.allCodeTabs.value.indexWhere(
+                                    if (global.allCodeTabs.indexWhere(
                                             (element) =>
                                                 element.directory == e) <
                                         0) {
-                                      setState(() {
-                                        global.allCodeTabs.value.add(
-                                            global.CodeTabs(
-                                                e.path.substring(
-                                                    e.path.lastIndexOf("/") +
-                                                        1),
-                                                e,
-                                                code,
-                                                code,
-                                                true,
-                                                false));
-                                        global.tabsChanged.value = true;
-                                      });
-
+                                      global.allCodeTabs.add(global.CodeTabs(
+                                          e.path.substring(
+                                              e.path.lastIndexOf("/") + 1),
+                                          e,
+                                          code,
+                                          code,
+                                          true,
+                                          false));
+                                      global.tabsChanged.value = true;
                                       print("Opening " +
                                           e.path.substring(
                                               e.path.lastIndexOf("/") + 1));

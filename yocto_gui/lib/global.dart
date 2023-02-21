@@ -1,11 +1,7 @@
 library yocto_gui.globals;
 
-import 'dart:math';
 import 'dart:io';
 import 'dart:convert';
-
-import 'package:flutter/rendering.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
@@ -14,28 +10,25 @@ import 'package:flutter/material.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 List<TerminalCommand> allCommands = List<TerminalCommand>.empty(growable: true);
 List<LayerBranches> allLayers = List<LayerBranches>.empty(growable: true);
-ValueNotifier<List<CodeTabs>> allCodeTabs = ValueNotifier<List<CodeTabs>>([]);
+List<CodeTabs> allCodeTabs = List<CodeTabs>.empty(growable: true);
 ValueNotifier<bool> tabsChanged = ValueNotifier<bool>(false);
+ValueNotifier<bool> layersLoaded = ValueNotifier<bool>(false);
+ValueNotifier<bool> terminalChange = ValueNotifier<bool>(false);
 String user_host = "";
 String initWD = "";
 
-Future<Directory> getDirectory() async {
-  Directory documentPath = Directory("/home");
-  String? folderPath = await FilePicker.platform.getDirectoryPath();
-  // String? folderPath = await FilesystemPicker.open(
-  //   title: 'Pick Directory',
-  //   showGoUp: true,
-  //   context: navigatorKey.currentContext!,
-  //   rootDirectory: documentPath!,
-  //   fsType: FilesystemType.folder,
-  //   pickText: 'Pick Folder',
-  // );
-  Directory folder = Directory("/home");
-  if (folderPath != null) {
-    folder = Directory(folderPath!);
-  }
+class YoctoProject {
+  String projectName;
+  Directory projectPath;
+  List<BitBakeLayer> bitBakeLayers;
+  YoctoProject(this.projectName, this.projectPath, this.bitBakeLayers);
+}
 
-  return folder;
+class BitBakeLayer {
+  String layerName;
+  String layerDescription;
+  Directory layerPath;
+  BitBakeLayer(this.layerName, this.layerDescription, this.layerPath);
 }
 
 class Folder {
@@ -129,6 +122,24 @@ class OpenEmbeddedLayers {
       this.layerName, this.layerType, this.description, this.repository);
 }
 
+Future<Directory> getDirectory() async {
+  Directory documentPath = Directory("/home");
+  String? folderPath = await FilePicker.platform.getDirectoryPath();
+  Directory folder = Directory("/home");
+  if (folderPath != null) {
+    folder = Directory(folderPath!);
+    executeCommand(TerminalCommand(0, "", "", "cd", folderPath, "", "", false))
+        .then((value) {
+      allCommands.clear();
+      allCommands.add(
+          TerminalCommand(0, user_host, initWD, "execute", "", "", "", true));
+      terminalChange.value = true;
+    });
+  }
+
+  return folder;
+}
+
 Future<List<Folder>> getAllDirectory(Directory folder) async {
   List<Folder> allFolders = List<Folder>.empty(growable: true);
   try {
@@ -187,14 +198,18 @@ Future<TerminalCommand> executeCommand(TerminalCommand inputCommand) async {
 
   try {
     var finalResponse = jsonDecode(response.body.replaceAll(r'\', r"\\"));
-    if (inputCommand.commandType == "execute") {
+    if (inputCommand.commandType == "execute" ||
+        inputCommand.commandType == "cd") {
       user_host = '${finalResponse["userHostName"]}';
       result.user_hostName = '${finalResponse["userHostName"]}';
       result.wd = '${finalResponse["workingDirectory"]}';
+      initWD = result.wd;
+      print(initWD);
       result.stdout =
           '${finalResponse["stdout"].toString().replaceAll('{nl}', '\n')}';
       result.stderr =
           '${finalResponse["stderr"].toString().replaceAll('{nl}', '\n')}';
+      result.commandIndex = inputCommand.commandIndex;
     } else if (inputCommand.commandType == "init") {
       user_host = '${finalResponse["userHostName"]}';
       initWD = '${finalResponse["workingDirectory"]}';
@@ -265,5 +280,6 @@ Future<List<OpenEmbeddedLayers>> retrieveLayers(Uri uri) async {
         tableData[3].split("<a")[0].split('">')[1].replaceAll('"', "").trim());
     layers.add(OpenEmbeddedLayers(layerName, type, description, repository));
   }).toList();
+  layersLoaded.value = true;
   return layers;
 }

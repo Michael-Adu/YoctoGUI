@@ -21,6 +21,27 @@ var server = http.createServer((request, response)=>{
                     }`
                     );
             }
+            else if(obj.commandType=="cd"){
+                try{
+                    var commandResult= shell.cd(obj.command);
+                    
+                    // var command_stdout = commandResult.stdout.split("\n").join("{nl}").replace(/\"/g, "'");
+                    // var command_stderr = commandResult.stderr.split("\n").join("{nl}").replace(/\"/g, "'");
+                    var userHostName = shell.exec('echo "$USER@$HOSTNAME"').stdout.split("\n")[0];
+                    var workingDirectory = shell.exec('echo "$PWD"').stdout.split("\n")[0];
+                    response.end(
+                        `{
+                            "userHostName": "${userHostName}",
+                            "workingDirectory": "${workingDirectory}",
+                            "stdout":"",
+                            "stderr":""
+                        }`
+                        );
+                }
+                catch(e){
+                    response.end(e)
+                }
+            }
             else if(obj.commandType=="execute"){
                 try{
                     var commandResult= shell.exec(obj.command, {
